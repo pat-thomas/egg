@@ -19,3 +19,8 @@ function delete-branch () {
   git branch -D $wip_branch_name
   git push origin --delete $wip_branch_name
 }
+
+bake_task merge-wip "Merges stable feature branch with corresponding WIP branch"
+function merge-wip () {
+  git merge $(git rev-parse --abbrev-ref HEAD).wip
+}
