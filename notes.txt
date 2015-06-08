@@ -1,0 +1,8 @@
+;;desired usage:
+
+(ns my-app.core
+  (:require-macros [egg.dsl :refer [defapp]]))
+
+(defapp my-app
+  {:routes :my-app.routes
+   })
