@@ -1,0 +1,10 @@
+bake_task new-branch "Creates a new branch and a new WIP branch"
+function new-branch () {
+  local branch_name=$1
+  local wip_branch_name=$1.wip
+  git checkout master
+  git checkout -b $branch_name
+  git push
+  git checkout -b $wip_branch_name
+  git push
+}
