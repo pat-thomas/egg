@@ -3,9 +3,10 @@
 
 (defmacro defapp
   [app-name {:keys [routes] :as app-opts}]
-  (let [routes (or routes :routes)
-        route-namespaces (h/find-cljs-sources-in-dir (name routes))]
-    (println "route-namespaces:" route-namespaces)
+  (let [routes           (or routes :routes)
+        route-namespaces (h/find-namespaces-for-prefix (name routes))]
     `(do
        (cljs.core/enable-console-print!)
+       ~@(for [namespace# route-namespaces]
+           `(require ~namespace#))
        :ok)))
