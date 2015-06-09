@@ -45,7 +45,7 @@
   [^String prefix]
   (let [src-root          (current-directory-absolute-with-src)
         cljs-files        (find-cljs-sources-in-dir src-root)
-        project-root-name (clojure.string/replace (pwd) #"_" "-")]
+        project-root-name (pwd)]
     (->> cljs-files
          (map (fn [^java.io.File file]
                 (let [absolute-path  (.getAbsolutePath file)
@@ -58,6 +58,4 @@
                 (str project-root-name
                      "."
                      (-> file
-                         (clojure.string/replace #"\/" ".")
-                         (clojure.string/replace #"_" "-")))))
-         (map symbol))))
+                         (clojure.string/replace #"\/" "."))))))))

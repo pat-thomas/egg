@@ -8,5 +8,5 @@
     `(do
        (cljs.core/enable-console-print!)
        ~@(for [namespace# route-namespaces]
-           `(require ~namespace#))
+           `(goog/require ~namespace#))
        :ok)))
