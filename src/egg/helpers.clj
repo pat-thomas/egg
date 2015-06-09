@@ -37,20 +37,20 @@
 
 (defn find-cljs-sources-in-dir
   [^String dir]
-  (let [curr-dir         (current-directory-absolute-with-src)
-        abs-dir-path     (-> "src/"
-                             (str (pwd) "/" dir)
-                             java.io.File.
-                             .getAbsolutePath)]
-    (->> abs-dir-path
-         java.io.File.
-         file-seq
-         (filter cljs-file?)
-         (map #(clojure.string/replace % #"_" "-"))
-         (sort-by #(.getAbsolutePath %))
-         (map (fn [^String source-file]
-                (-> source-file
-                    (.substring (ending-index source-file curr-dir))
-                    (clojure.string/replace #".cljs" "")
-                    (clojure.string/replace #"\/" ".")
-                    symbol))))))
+  (sort-by #(.getAbsolutePath %)
+           (filter cljs-file? (file-seq (java.io.File. dir)))))
+
+(defn find-namespaces-for-prefix
+  [^String prefix]
+  (let [src-root   (current-directory-absolute-with-src)
+        cljs-files (find-cljs-sources-in-dir src-root)]
+    (map (fn [^java.io.File file]
+           (let [absolute-path         (.getAbsolutePath file)
+                 idx                   (ending-index absolute-path src-root)
+                 base-file-path        (.substring absolute-path idx)
+                 base-file-path-no-ext (apply str (take (- (count base-file-path) 5) base-file-path))]
+             (-> base-file-path-no-ext
+                 (clojure.string/replace #"\/" ".")
+                 (clojure.string/replace #"_" "-")
+                 symbol)))
+         cljs-files)))
