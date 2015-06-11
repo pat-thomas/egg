@@ -3,10 +3,9 @@
 
 (defmacro defapp
   [app-name {:keys [routes] :as app-opts}]
-  (let [routes           (or routes :routes)
-        route-namespaces (h/find-namespaces-for-prefix (name routes))]
+  (let [current-ns       *ns*
+        routes           (or routes :routes)
+        route-namespaces (h/find-cljs-namespaces-for-prefix routes)]
     `(do
-       (cljs.core/enable-console-print!)
-       ~@(for [namespace# route-namespaces]
-           `(goog/require ~namespace#))
-       :ok)))
+       ~@(for [route-ns# route-namespaces]
+           `(goog/require ~(h/namespace->goog-require-str route-ns#))))))
