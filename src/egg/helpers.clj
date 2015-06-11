@@ -41,21 +41,46 @@
   (sort-by #(.getAbsolutePath %)
            (filter cljs-file? (file-seq (java.io.File. dir)))))
 
-(defn find-namespaces-for-prefix
+(defn find-cljs-files-for-prefix
   [^String prefix]
   (let [src-root          (current-directory-absolute-with-src)
         cljs-files        (find-cljs-sources-in-dir src-root)
         project-root-name (pwd)]
     (->> cljs-files
          (map (fn [^java.io.File file]
-                (let [absolute-path  (.getAbsolutePath file)
-                      idx            (ending-index absolute-path src-root)
-                      base-file-path (.substring absolute-path idx)]
-                  (apply str (take (- (count base-file-path) 5) base-file-path)))))
+                (let [absolute-path (.getAbsolutePath file)
+                      idx           (ending-index absolute-path src-root)]
+                  (.substring absolute-path idx))))
          (filter (fn [^String file]
                    (.startsWith file prefix)))
          (map (fn [^String file]
-                (str project-root-name
-                     "."
-                     (-> file
-                         (clojure.string/replace #"\/" "."))))))))
+                (str src-root file))))))
+
+(defn find-cljs-namespaces-for-prefix
+  [prefix]
+  (let [prefix            (name prefix)
+        remove-cljs-suffix (fn [^String cljs-file-path]
+                             (let [len (count cljs-file-path)]
+                               (->> cljs-file-path
+                                    (take (- len 5))
+                                    (apply str))))
+        src-root          (current-directory-absolute-with-src)
+        cljs-files        (find-cljs-sources-in-dir src-root)
+        project-root-name (pwd)]
+    (->> cljs-files
+         (map (fn [^java.io.File file]
+                (let [absolute-path (.getAbsolutePath file)
+                      idx           (ending-index absolute-path src-root)]
+                  (-> absolute-path
+                      (.substring idx)
+                      remove-cljs-suffix
+                      (clojure.string/replace #"\/" ".")
+                      (clojure.string/replace #"_" "-")
+                      symbol)))))))
+
+(defn namespace->goog-require-str
+  [^clojure.lang.Symbol namespace]
+  (str (pwd) "." (-> namespace
+                     name
+                     (clojure.string/replace #"\." "/")
+                     (clojure.string/replace #"-" "_"))))
