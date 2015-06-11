@@ -58,25 +58,28 @@
 
 (defn find-cljs-namespaces-for-prefix
   [prefix]
-  (let [prefix            (name prefix)
+  (let [prefix             (name prefix)
         remove-cljs-suffix (fn [^String cljs-file-path]
                              (let [len (count cljs-file-path)]
                                (->> cljs-file-path
                                     (take (- len 5))
                                     (apply str))))
-        src-root          (current-directory-absolute-with-src)
-        cljs-files        (find-cljs-sources-in-dir src-root)
-        project-root-name (pwd)]
+        src-root           (current-directory-absolute-with-src)
+        cljs-files         (find-cljs-sources-in-dir src-root)
+        project-root-name  (pwd)]
     (->> cljs-files
          (map (fn [^java.io.File file]
                 (let [absolute-path (.getAbsolutePath file)
                       idx           (ending-index absolute-path src-root)]
-                  (-> absolute-path
-                      (.substring idx)
-                      remove-cljs-suffix
-                      (clojure.string/replace #"\/" ".")
-                      (clojure.string/replace #"_" "-")
-                      symbol)))))))
+                  (.substring absolute-path idx))))
+         (filter (fn [^String file]
+                   (.startsWith file prefix)))
+         (map (fn [^String file]
+                (-> file
+                    remove-cljs-suffix
+                    (clojure.string/replace #"\/" ".")
+                    (clojure.string/replace #"_" "-")
+                    symbol))))))
 
 (defn namespace->goog-require-str
   [^clojure.lang.Symbol namespace]
