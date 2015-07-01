@@ -85,5 +85,5 @@
   [^clojure.lang.Symbol namespace]
   (str (pwd) "." (-> namespace
                      name
-                     (clojure.string/replace #"\." "/")
+                     ;;(clojure.string/replace #"\." "/")
                      (clojure.string/replace #"-" "_"))))
